@@ -14,18 +14,24 @@ def dfs_recursive(graph, vertex, visited=None, path=None):
             path = dfs_recursive(graph, neighbor, visited, path)
     return path
 
-def bfs_recursive(graph, start, visited=None):
+def bfs_recursive(graph, start, visited=None, path=None):
     if visited is None:
         visited = set()
-    queue = [start]
-    visited.add(start)
+    if path is None:
+        path = []
+    queue = deque([(start, path)])
+
     while queue:
-        vertex = queue.pop(0)
+        vertex, current_path = queue.popleft()
+        visited.add(vertex)
+        current_path = current_path + [vertex]
+
         for neighbor in graph[vertex]:
             if neighbor not in visited:
-                queue.append(neighbor)
+                queue.append((neighbor, current_path))
                 visited.add(neighbor)
-    return visited
+
+    return current_path
 
 # Створення графа
 G = nx.Graph()
