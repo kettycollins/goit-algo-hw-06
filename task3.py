@@ -11,10 +11,23 @@ def create_weighted_graph():
     G.add_edge('D', 'E', weight=1)
     return G
 
-def dijkstra_shortest_paths(graph, source):
-    shortest_paths = dict(nx.single_source_dijkstra_path(graph, source))
-    length_paths = nx.single_source_dijkstra_path_length(graph, source)
-    return shortest_paths, length_paths
+def dijkstra_shortest_paths(graph, start):
+    distances = {node: float('infinity') for node in graph.nodes}
+    distances[start] = 0
+    visited = set()
+
+    while len(visited) < len(graph.nodes):
+        current_node = min((node for node in distances if node not in visited), key=lambda node: distances[node])
+        visited.add(current_node)
+
+        for neighbor in graph.neighbors(current_node):
+            weight = graph[current_node][neighbor]['weight']
+            potential_distance = distances[current_node] + weight
+
+            if potential_distance < distances[neighbor]:
+                distances[neighbor] = potential_distance
+
+    return distances
 
 def visualize_weighted_graph(graph):
     pos = nx.spring_layout(graph, seed=42)
@@ -23,21 +36,16 @@ def visualize_weighted_graph(graph):
     nx.draw_networkx_edge_labels(graph, pos, edge_labels=labels)
     plt.show()
 
-
 def main():
     weighted_graph = create_weighted_graph()
 
-    # Знаходження найкоротших шляхів та їх довжин
     start_node = 'A'
-    shortest_paths, length_paths = dijkstra_shortest_paths(weighted_graph, start_node)
+    distances = dijkstra_shortest_paths(weighted_graph, start_node)
 
-    # Вивід результатів
-    for target_node, path in shortest_paths.items():
-        if start_node != target_node:
-            distance = length_paths[target_node]
-            print(f"Найкоротший шлях між {start_node} та {target_node}: {path}, Довжина: {distance}")
-
-    # Візуалізація графа
+    for target_node, distance in distances.items():
+        if distance != float('infinity'):
+            print(f"Найкоротший шлях між {start_node} та {target_node}: Довжина: {distance}")
+            
     visualize_weighted_graph(weighted_graph)
 
 if __name__ == "__main__":
